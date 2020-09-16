@@ -6,6 +6,7 @@ const s3 = new aws.S3({region: 'ap-northeast-2'});
 exports.handler = async (event, context, callback) => {
     const bucket = event.Records[0].s3.bucket.name;
     const key = event.Records[0].s3.object.key;
+    const ext = key.split('.')[1];
     
     try {
         const s3Object = await s3.getObject({
@@ -15,13 +16,14 @@ exports.handler = async (event, context, callback) => {
         .promise()
         .then(data => sharp(data.Body)
             .resize(113, 151)
+            .toFormat(ext, { quality: 75})
             .withMetadata()
             .toBuffer()
         );
 
         s3.putObject({
             Bucket: bucket,
-            Key: `resize/${key}`,
+            Key: `${key}`,
             Body: s3Object,
         })
         .promise()
@@ -30,7 +32,7 @@ exports.handler = async (event, context, callback) => {
                 console.error(err);
                 return callback(err);
             }
-            return callback(null, `resize/${key}`);
+            return callback(null, `${key}`);
         })
 
     } catch (err) {

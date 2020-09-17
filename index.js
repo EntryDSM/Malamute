@@ -15,7 +15,7 @@ exports.handler = (event, context, callback) => {
     })
     .promise()
     .then(data => sharp(data.Body)
-        .resize(113, 136)
+        .resize(90, 108)
         .toFormat(ext, { quality: 75})
         .withMetadata()
         .toBuffer()
@@ -27,8 +27,8 @@ exports.handler = (event, context, callback) => {
         }).promise()
     )
     .then(() => s3.deleteObject({
-        Bucket: bucket,
-        Key: key
+            Bucket: bucket,
+            Key: key
         }).promise()
     )
     .then(() => callback(null, `${key}`))

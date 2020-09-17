@@ -7,6 +7,7 @@ exports.handler = async (event, context, callback) => {
     const bucket = event.Records[0].s3.bucket.name;
     const key = event.Records[0].s3.object.key;
     const ext = key.split('.')[1];
+    const filename = key.split('/')[1];
     
     try {
         const s3Object = await s3.getObject({
@@ -23,12 +24,24 @@ exports.handler = async (event, context, callback) => {
 
         s3.putObject({
             Bucket: bucket,
-            Key: `${key}`,
+            Key: `${filename}`,
             Body: s3Object,
         })
         .promise()
         .then(err => {
             if (err) {
+                console.error(err);
+                return callback(err);
+            }
+        })
+
+        s3.deleteObject({
+            Bucket: bucket,
+            Key: key
+        })
+        .promise()
+        .then(err => {
+            if(err) {
                 console.error(err);
                 return callback(err);
             }
